@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>Jak se píšou pluginy do jQuery?</title>
+		<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+		<meta name="google" content="notranslate" />
+		
+		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>
+		<script type="text/javascript" src="js/evidentationNumber.jquery.js"></script>
+		<script type="text/javascript">
+		$(function() {
+			var options = {
+					select0: 'nerozhoduje',
+					selects: 'Vybráno řádků: ',
+					createView: function(pack, model) {
+							$(pack).append(model.base)
+								.append(':')
+								.append(model.sufix);
+						}
+					};
+
+			$('.evidentationNumber').evidentationNumber();
+			$('[name="evidentationNumber4"]').evidentationNumber(options);
+			
+			/*
+			$('#inject-btn').on('click', function(ev) {
+				console.log(this);
+				ev.preventDefault();
+				ev.stopPropagation(); 
+				ev.stopImmediatePropagation();
+				return false;
+			})
+			*/
+			$('#inject-btn').on('click', function(ev) {
+				try {
+					console.log(this);
+					$('[name="evidentationNumber2"]')
+							.val($('#inject').val())
+							.change();
+				}
+				catch (e) {
+					console.log(e);
+				}
+				return false;
+			})
+
+		});
+		</script>
+	</head>
+	<body>
+		<p>Příklad pluginu, který nám nějak vylepšuje zadávání rodného čísla.</p>
+		<div>
+			<p>Předloha:</p>
+			<form>
+				<input type="text" name="evidentationNumber1" size="35" placeholder="Uveďte rodné číslo" />
+				<input type="submit" value="send">
+				<br/>
+			</form>
+		</div>
+		<div>
+			<p>Odekorováno jQuery:</p>
+			<form>
+				<input type="text" name="evidentationNumber2" class="evidentationNumber" size="35" placeholder="Uveďte rodné číslo" value="1234x5678/2222" />
+				<input type="text" name="evidentationNumber3" class="evidentationNumber" size="35" placeholder="Uveďte rodné číslo" />
+				<input type="text" name="evidentationNumber4" size="35" placeholder="Uveďte rodné číslo" value="/12365" />
+				<input type="submit" value="send">
+				<br/>
+				<input type="text" id="inject">
+				<input type="submit" id="inject-btn" value="inject" />
+			</form>
+		</div>
+	</body>
+</html>
