@@ -2,11 +2,11 @@
  *	Vzor pro vytvoření jQuery pluginu stavějící na prototypech.
  *
  *  Konstrukční funkce je funkce vytvářející instanci třídy objektu.
- *	Instanční funkce je funkce vytváčející instanci objektu. Obvykle ji pojmenováváme 
- *		init, a volá se podle zvyklostí, v případě, kdy jako první parametr je 
+ *	Instanční funkce je funkce vytváčející instanci objektu. Obvykle ji pojmenováváme
+ *		init, a volá se podle zvyklostí, v případě, kdy jako první parametr je
  *		tabulka nastavení, případně je prázdný.
- *	Option funkce je funkce, která se volá jménem uvedeným jako první parametr. 
- *		V případě, že druhý parametr je prázdný, funguje jako getter, v případě, 
+ *	Option funkce je funkce, která se volá jménem uvedeným jako první parametr.
+ *		V případě, že druhý parametr je prázdný, funguje jako getter, v případě,
  *		že je vyplněn funguje jako setter.
  *
  *  Licensed under both the MIT license and the GNU GPLv2 (same as jQuery: http://jquery.org/license)
@@ -27,15 +27,16 @@ if (jQuery)(function($) {
 		/**
 		 * Inicializate function for instantion.
 		 *
-		 * @this Window
-		 * @param DOMElement
-		 * @param context instance pluginu
+		 * @this DOMElement
+		 * @param options Instance pluginu pro ten který konkrétní element.
+		 *
+		 * @return DOMElement
 		 */
-		function init(self, context) 
+		function init(context)
 		{
 			//	Model
 			var component = {
-					'model': $(self),
+					'model': $(this),
 					'base': $('<input>', {
 							'type': 'text',
 							}),
@@ -51,7 +52,7 @@ if (jQuery)(function($) {
 			component.base.on('change', function() {
 				context.updateModel(component, {'base': $(this).val()});
 			});
-			
+
 			component.sufix.on('change', function() {
 				context.updateModel(component, {'sufix': $(this).val()});
 			});
@@ -61,13 +62,17 @@ if (jQuery)(function($) {
 			});
 
 			//	View
-			$(self).wrap($('<div>'));
-			$(self).hide();
-			var pack = $(self).parent();
+			$(this).wrap($('<div>', {
+				'css': {
+					'display': 'inline-block'
+					}
+				}));
+			$(this).hide();
+			var pack = $(this).parent();
 			context.createView(pack, component);
-			context.updateView(component, $(self));
-						
-			return self;
+			context.updateView(component, $(this));
+
+			return context;
 		};
 
 
@@ -75,39 +80,56 @@ if (jQuery)(function($) {
 		/**
 		 * Construct Function
 		 *
+		 * Touto funkcí ovládáme instanci, vytváření, čtení a nastavování
+		 * atributů a hodnot. Pracujeme vždy s kolekcí elementů, což znamená,
+		 * že zásahy se týkají vždy celé kolekce.
+		 *
+		 * @this Colection of Elements
 		 * @param string | object method Název akce, nebo nastavení konstruktoru.
 		 */
 		function evidentationNumber(method)
 		{
-			/**
-			 *	Defaultní konfigurace pluginu.
-			 */
-			this.defaults = {
-				updateModel: evidentationNumber.prototype.updateModel,
-				updateView:  evidentationNumber.prototype.updateView,
-				createView:  evidentationNumber.prototype.createView,
-				separator: '/',
-				version: '0.1'
-			};
+			//	Instantion method - create instance.
+			if (typeof method === 'object' || !method) {
 
+				/**
+				 * Defaultní konfigurace pluginu.
+				 * Lokální proměnná.
+				 */
+				var defaults = {
+					updateModel: evidentationNumber.prototype.updateModel,
+					updateView:  evidentationNumber.prototype.updateView,
+					createView:  evidentationNumber.prototype.createView,
+					separator: '/',
+					version: '0.1'
+				};
 
-			/**
-			 *	Zpracování všech elementů selektoru.
-			 */
-			var _this = this;
-			return this.each(function(index, el) {
-				//	Instantion method
-				if (typeof method === 'object' || !method) {
-					return init(this, $.fn.extend(_this.defaults, method || {}));
-				}
-				//	Option method
-				else if (evidentationNumber.prototype[method]) {
-					return evidentationNumber.prototype[method].apply(this, Array.prototype.slice.call(arguments, 1));
-				}
-				else {
-					$.error('Method ' + method + ' does not exist on jQuery.evidentationNumber');
-				}
-			});
+				/**
+				 * Zpracování všech elementů selektoru. Pro každý element vytvoříme
+				 * instanci pomocí funkce `init'. Výslednou instanci nalepíme na objekt elementu.
+				 * $.fn.extend({}, ... ) je nutné, aby se vytvořila vždy unikátní instance objektu.
+				 *
+				 * @param this DOMElement
+				 * @param index Of colection of Elements
+				 * @param el DOMElement
+				 */
+				return this.each(function(index, el) {
+					//	Zapsat instanci do objektu.
+					this.evidentationNumber = init.call(this, $.fn.extend({}, defaults, method || {}));
+					return this;
+				});
+			}
+			//	Option method
+			else if (evidentationNumber.prototype[method]) {
+				var result = [];
+				this.each(function(index, el) {
+					result.push(evidentationNumber.prototype[method].apply(el.evidentationNumber, Array.prototype.slice.call(arguments, 1)));
+				});
+				return result;
+			}
+			else {
+				$.error('Method ' + method + ' does not exist on jQuery.tacoCombobox');
+			}
 		}
 
 
@@ -125,7 +147,7 @@ if (jQuery)(function($) {
 					'base': opts.base || component.base.val(),
 					'sufix': opts.sufix || component.sufix.val()
 					};
-			component.model.val(nuevo.base + "/" + nuevo.sufix);
+			component.model.val(nuevo.base + this.separator + nuevo.sufix);
 		}
 
 
@@ -139,13 +161,13 @@ if (jQuery)(function($) {
 		 */
 		evidentationNumber.prototype.updateView = function(component, model)
 		{
-			var def = model.val().split('/');
+			var def = model.val().split(this.separator);
 			component.base.val(def.length > 0 ? def[0] : null);
 			component.sufix.val(def.length > 1 ? def[1] : null);
 		}
-		
-		
-		
+
+
+
 		/**
 		 * Vytvořit dekoraci inputu obsahující modelové prvky.
 		 *
@@ -156,7 +178,7 @@ if (jQuery)(function($) {
 		evidentationNumber.prototype.createView = function(pack, component)
 		{
 			$(pack).append(component.base)
-				.append(this.separator)
+				.append('/')
 				.append(component.sufix);
 		}
 

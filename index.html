@@ -5,7 +5,7 @@
 		<title>Jak se píšou pluginy do jQuery?</title>
 		<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
 		<meta name="google" content="notranslate" />
-		
+
 		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8/jquery.min.js"></script>
 		<script type="text/javascript" src="js/evidentationNumber.jquery.js"></script>
 		<script type="text/javascript">
@@ -13,6 +13,7 @@
 			var options = {
 					select0: 'nerozhoduje',
 					selects: 'Vybráno řádků: ',
+					separator: '-',
 					createView: function(pack, model) {
 							$(pack).append(model.base)
 								.append(':')
@@ -20,55 +21,56 @@
 						}
 					};
 
-			$('.evidentationNumber').evidentationNumber();
-			$('[name="evidentationNumber4"]').evidentationNumber(options);
-			
-			/*
-			$('#inject-btn').on('click', function(ev) {
-				console.log(this);
-				ev.preventDefault();
-				ev.stopPropagation(); 
-				ev.stopImmediatePropagation();
-				return false;
-			})
-			*/
-			$('#inject-btn').on('click', function(ev) {
-				try {
-					console.log(this);
-					$('[name="evidentationNumber2"]')
-							.val($('#inject').val())
-							.change();
-				}
-				catch (e) {
-					console.log(e);
-				}
-				return false;
-			})
-
+			$('.evidentationNumber').evidentationNumber({separator: '-'});
+			$('[name="en4"]').evidentationNumber(options);
 		});
 		</script>
 	</head>
 	<body>
-		<p>Příklad pluginu, který nám nějak vylepšuje zadávání rodného čísla.</p>
+		<h1>Jak se píšou pluginy do jQuery?</h1>
+
+		<p>Příklad pluginu, který nám nějak vylepšuje zadávání rodného čísla. Výsledek viz URL.</p>
 		<div>
-			<p>Předloha:</p>
+			<h2>Předloha:</h2>
 			<form>
-				<input type="text" name="evidentationNumber1" size="35" placeholder="Uveďte rodné číslo" />
+				<label>1</label>
+				<input type="text" name="en1" size="35" placeholder="Uveďte rodné číslo" />
 				<input type="submit" value="send">
 				<br/>
 			</form>
 		</div>
 		<div>
-			<p>Odekorováno jQuery:</p>
+			<h2>Odekorováno jQuery:</h2>
 			<form>
-				<input type="text" name="evidentationNumber2" class="evidentationNumber" size="35" placeholder="Uveďte rodné číslo" value="1234x5678/2222" />
-				<input type="text" name="evidentationNumber3" class="evidentationNumber" size="35" placeholder="Uveďte rodné číslo" />
-				<input type="text" name="evidentationNumber4" size="35" placeholder="Uveďte rodné číslo" value="/12365" />
-				<input type="submit" value="send">
+				<label>2</label>
+				<input type="text" name="en2" class="evidentationNumber" size="35" placeholder="Uveďte rodné číslo" value="1234x5678-2222" />
+				<p>Odekorováno defaultně nakonfigurovaným pluginem. Přednastavená hodnota.</p>
+
+				<label>3</label>
+				<input type="text" name="en3" class="evidentationNumber" size="35" placeholder="Uveďte rodné číslo" />
+				<p>Odekorováno defaultně nakonfigurovaným pluginem. Bez původní hodnoty.</p>
+
+				<label>4</label>
+				<input type="text" name="en4" size="35" placeholder="Uveďte rodné číslo" value="-12365" />
+				<p>Vlastní metoda <code>evidentationNumber.createView()</code>. V hodnotě je použit jen sufix.</p>
+
 				<br/>
-				<input type="text" id="inject">
-				<input type="submit" id="inject-btn" value="inject" />
+				<input type="submit" value="send">
+
 			</form>
 		</div>
+		<p>
+			Plugin můžeme ovlivnit následujícími způsoby:
+		</p>
+		<ul>
+			<li>1. Použít property</li>
+			<li>2. Vytvořit odvozenou verzi a použít tu</li>
+			<li>3. Programově ovlivňujeme instanci přes selector <code>evidentationNumber(<i>method</i>[, <i>hodnota</i>])</code></li>
+		</ul>
+		<p>
+			Jako model téměř výhradně používáme input, který visuelně překrýváme vlastní verzí.
+			Nutné, při každé změně data zapsat do inputu a neuchovávat je nikde jinde.
+			V případě, kdy bude vypnut javascript, vše bude stále fungovat.
+		</p>
 	</body>
 </html>
