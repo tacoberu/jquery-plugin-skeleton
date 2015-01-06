@@ -35,7 +35,7 @@ if (jQuery)(function($) {
 		 */
 		function init(options)
 		{
-			// own code
+			// own code for initialize of plugin
 
 			return options;
 		};
@@ -62,8 +62,16 @@ if (jQuery)(function($) {
 				 * Lokální proměnná.
 				 */
 				var defaults = {
+					//	sample overiding method
 					sample: xpattern.prototype.sample,
+
+					//	sample atribute
 					separator: '/',
+
+					//	Event by done initialize.
+					done: null,
+
+					//	misc
 					version: '0.1'
 				};
 
@@ -77,8 +85,20 @@ if (jQuery)(function($) {
 				 * @param el DOMElement
 				 */
 				return this.each(function(index, el) {
+
+					//	prevent repetitively dekorated.
+					if (this.xpattern) {
+						return this;
+					}
+
 					//	Zapsat instanci do objektu.
 					this.xpattern = init.call(this, $.fn.extend({}, defaults, method || {}));
+
+					//	fire done of initialize
+					if (this.xpattern.done) {
+						this.xpattern.done.call(this);
+					}
+
 					return this;
 				});
 			}
@@ -88,7 +108,7 @@ if (jQuery)(function($) {
 				this.each(function(index, el) {
 					result.push(xpattern.prototype[method].apply(el.xpattern, Array.prototype.slice.call(arguments, 1)));
 				});
-				return result;
+				return $(result);
 			}
 			else {
 				$.error('Method ' + method + ' does not exist on jQuery.tacoCombobox');
